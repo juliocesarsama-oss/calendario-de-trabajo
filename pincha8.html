@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario de Trabajo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+    }
+    label, select, input, button {
+      display: block;
+      margin: 10px auto;
+      max-width: 300px;
+      width: 100%;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #calendario {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .dia {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.9em;
+      border: 1px solid #ccc;
+    }
+    .trabaja {
+      background-color: #ffcdd2;
+    }
+    .descansa {
+      background-color: #c8e6c9;
+    }
+    .sabado.trabaja, .domingo.trabaja {
+      background-color: #f44336;
+      color: white;
+    }
+    .sabado.descansa, .domingo.descansa {
+      background-color: #4caf50;
+      color: white;
+    }
+    .encabezado {
+      font-weight: bold;
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calendario de Trabajo</h1>
+
+  <label for="inicio">Segundo día de trabajo:</label>
+  <input type="date" id="inicio">
+
+  <label for="anio">Año:</label>
+  <input type="number" id="anio" value="2025" min="2000" max="2100">
+
+  <label for="mes">Mes:</label>
+  <select id="mes">
+    <option value="0">Enero</option>
+    <option value="1">Febrero</option>
+    <option value="2">Marzo</option>
+    <option value="3">Abril</option>
+    <option value="4">Mayo</option>
+    <option value="5">Junio</option>
+    <option value="6">Julio</option>
+    <option value="7" selected>Agosto</option>
+    <option value="8">Septiembre</option>
+    <option value="9">Octubre</option>
+    <option value="10">Noviembre</option>
+    <option value="11">Diciembre</option>
+  </select>
+
+  <button id="mostrar">Mostrar calendario</button>
+
+  <div id="calendario"></div>
+
+  <script>
+    document.getElementById('mostrar').addEventListener('click', function () {
+      const inicioStr = document.getElementById('inicio').value;
+      const anio = parseInt(document.getElementById('anio').value);
+      const mes = parseInt(document.getElementById('mes').value);
+
+      if (!inicioStr || isNaN(anio) || isNaN(mes)) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+
+      const [year, month, day] = inicioStr.split("-");
+      const inicio = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+      if (isNaN(inicio.getTime())) {
+        alert("La fecha de inicio no es válida.");
+        return;
+      }
+
+      const calendario = document.getElementById('calendario');
+      calendario.innerHTML = "";
+
+      const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      for (let i = 0; i < 7; i++) {
+        const encabezado = document.createElement('div');
+        encabezado.textContent = diasSemana[i];
+        encabezado.className = 'dia encabezado';
+        calendario.appendChild(encabezado);
+      }
+
+      const primerDia = new Date(anio, mes, 1);
+      const ultimoDia = new Date(anio, mes + 1, 0);
+      const primerDiaSemana = primerDia.getDay();
+
+      for (let i = 0; i < primerDiaSemana; i++) {
+        const vacio = document.createElement('div');
+        vacio.className = 'dia';
+        calendario.appendChild(vacio);
+      }
+
+      for (let d = 1; d <= ultimoDia.getDate(); d++) {
+        const fecha = new Date(anio, mes, d);
+        const diferencia = Math.floor((fecha - inicio) / (1000 * 60 * 60 * 24));
+        const ciclo = diferencia % 4;
+        const diaSemana = fecha.getDay();
+
+        let estado = "";
+        let clase = "dia";
+
+        if (diferencia >= 0) {
+          if (ciclo === 0 || ciclo === 1) {
+            estado = "Trabaja";
+            clase += " trabaja";
+          } else {
+            estado = "Descansa";
+            clase += " descansa";
+          }
+        }
+
+        if (diaSemana === 6) clase += " sabado";
+        if (diaSemana === 0) clase += " domingo";
+
+        const celda = document.createElement('div');
+        celda.className = clase;
+        celda.innerHTML = `<strong>${d}</strong><br>${estado}`;
+        calendario.appendChild(celda);
+      }
+    });
+  </script>
+</body>
+</html>
